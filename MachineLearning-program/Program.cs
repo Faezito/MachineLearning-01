@@ -3,10 +3,53 @@ using MachineLearning_01.Models;
 
 void main()
 {
-    ExemploClassificacaoBinaria();
+    //ExemploClassificacaoBinaria();
+    ClassificacaoMulticlasse();
 }
 
 main();
+
+
+
+void ClassificacaoMulticlasse()
+{
+    var trainer = new PerfilAlunoModelTrainer();
+    var caminhoCSV = Path.Combine(AppContext.BaseDirectory, "perfil_aluno_idiomas.csv");
+    var caminhoModelo = Path.Combine(AppContext.BaseDirectory, "modelo_classificacao_multiclasse.zip");
+
+
+    trainer.CarregarDadosCSV(caminhoCSV);
+    trainer.TreinarModelo();
+    trainer.AvaliarModelo();
+    trainer.AvaliarMelhorModelo();
+    trainer.SalvarModelo(caminhoModelo);
+
+    var predictor = new PerfilAlunoModelPredictor();
+    predictor.CarregarModelo(caminhoModelo);
+
+    PerfilAlunoInputDataModel novoAluno = new()
+    {
+        NotaProficienciaGramatical = 6.5f,
+        NotaCompreensaoOral = 7.0f,
+        NotaConversacao = 5.5f
+    };
+
+    var res = predictor.Prever(novoAluno);
+    Console.WriteLine($"Perfil previsto: {res.PerfilPrevisto}");
+
+    Console.WriteLine("Pontuação por perfil: ");
+    var perfis = new[]
+    {
+        "Iniciante",
+        "Intermediario",
+        "Avançado"
+    };
+
+    for( int i = 0; i < res.Score.Length; i++)
+    {
+        Console.WriteLine($"{perfis[i]}: {res.Score[i]:P2}");
+    }
+};
 
 
 
